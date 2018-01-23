@@ -11,14 +11,14 @@ import json
 import time
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
-import requests
 
 ZUORA_CHUNKSIZE = 50
+
 
 def _unpack_response(operation, path, response):
     if path != '/object/invoice/':
         assert response.status_code == 200, \
-                '{} to {} failed: {}'.format(operation, path, response.content)
+            '{} to {} failed: {}'.format(operation, path, response.content)
     if path.startswith('/files/'):
         return response.text
 
@@ -28,17 +28,19 @@ def _unpack_response(operation, path, response):
 class Zuora(object):
     """
     instantiates a connection to Zuora service
-    
+
     example custom headers: headers={'zuora-version':'196.0'}
     """
 
-    def __init__(self, client_id, client_secret, endpoint='production'):
+    def __init__(self, client_id, client_secret, endpoint='production', header={}):
 
         client = BackendApplicationClient(client_id=client_id)
         oauth = OAuth2Session(client=client)
-        token = oauth.fetch_token(token_url='https://rest.zuora.com/oauth/token', client_id=client_id, client_secret=client_secret)
+        token = oauth.fetch_token(token_url='https://rest.zuora.com/oauth/token',
+                                  client_id=client_id, client_secret=client_secret)
 
-        self.headers = {"Authorization": "OAuth %s" % token.access_token}
+        self.request = token
+        self.headers = header
 
         if endpoint == 'production':
             self.endpoint = 'https://rest.zuora.com/v1'
@@ -47,7 +49,7 @@ class Zuora(object):
         else:
             self.endpoint = endpoint
 
-        self.accounting_periods = None        
+        self.accounting_periods = None
 
     def _get(self, path, payload=None):
         response = requests.get(self.endpoint + path,
@@ -57,7 +59,7 @@ class Zuora(object):
 
     def _delete(self, path):
         response = requests.delete(self.endpoint + path,
-                                  headers=self.headers)
+                                   headers=self.headers)
         return _unpack_response('GET', path, response)
 
     def _post(self, path, payload):
@@ -73,7 +75,7 @@ class Zuora(object):
         return _unpack_response('POST', path, response)
 
     def query(self, query_string):
-        response = self._post("/action/query", {"queryString" : query_string})
+        response = self._post("/action/query", {"queryString": query_string})
         return response
 
     def query_all(self, query_string):
@@ -92,13 +94,14 @@ class Zuora(object):
     # to query for the additional results.
 
     def query_more(self, query_locator):
-        return self._post("/action/queryMore", {"queryLocator" : query_locator})
+        return self._post("/action/queryMore", {"queryLocator": query_locator})
 
     def revenue_recognition_rule(self, charge_key):
         if isinstance(charge_key, dict):
             if 'ChargeId' in charge_key:
                 charge_key = charge_key['ChargeId']
-        response = self._get("/revenue-recognition-rules/subscription-charges/" + charge_key)
+        response = self._get(
+            "/revenue-recognition-rules/subscription-charges/" + charge_key)
         assert response['success'], response
         return response['revenueRecognitionRuleName']
 
@@ -107,14 +110,17 @@ class Zuora(object):
         return response
 
     def get_revenue_schedules_for_subscription_charge(self, object_id):
-        response = self._get("/revenue-schedules/subscription-charges/" + object_id)
+        response = self._get(
+            "/revenue-schedules/subscription-charges/" + object_id)
         return response
 
     def delete(self, object_type, ids):
         results = []
-        chunks = [ids[i:i + ZUORA_CHUNKSIZE] for i in range(0, len(ids), ZUORA_CHUNKSIZE)]
+        chunks = [ids[i:i + ZUORA_CHUNKSIZE]
+                  for i in range(0, len(ids), ZUORA_CHUNKSIZE)]
         for chunk in chunks:
-            results += self._post('/action/delete', {'type': object_type, 'ids': chunk})
+            results += self._post('/action/delete',
+                                  {'type': object_type, 'ids': chunk})
 
         return results
 
@@ -147,12 +153,14 @@ class Zuora(object):
     # }
 
     def revenue_schedule_for_invoice_item(self, object_id, payload):
-        response = self._post('/revenue-schedules/invoice-items/' + object_id, payload)
+        response = self._post(
+            '/revenue-schedules/invoice-items/' + object_id, payload)
         assert response['success'], response
         return response
 
     def revenue_schedule_for_subscription_charge(self, object_id, payload):
-        response = self._post('/revenue-schedules/subscription-charges/' + object_id, payload)
+        response = self._post(
+            '/revenue-schedules/subscription-charges/' + object_id, payload)
         assert response['success'], response
         return response
 
@@ -205,7 +213,8 @@ class Zuora(object):
 
     def update_object(self, object_name, object_id, payload):
         payload['Id'] = object_id
-        response = self._put('/object/{}/'.format(object_name) + object_id, payload)
+        response = self._put(
+            '/object/{}/'.format(object_name) + object_id, payload)
         assert response['Success'], response
 
     def create_object(self, object_name, payload):
@@ -299,7 +308,8 @@ class Zuora(object):
             payload['Status'] = status
         if transferred_to_accounting:
             payload['TransferredToAccounting'] = transferred_to_accounting
-        response = self._put('/object/invoice-item-adjustment/' + object_id, payload)
+        response = self._put(
+            '/object/invoice-item-adjustment/' + object_id, payload)
         assert response['Success'], response
         return response
 
@@ -338,7 +348,6 @@ class Zuora(object):
 
     def create_payment(self, payment):
         return self.create_object('payment', payment)
-
 
     # https://knowledgecenter.zuora.com/DC_Developers/SOAP_API/E1_SOAP_API_Object_Reference/CreditBalanceAdjustment
     #
@@ -389,12 +398,12 @@ class Zuora(object):
         payload.update(extras)
         response = self._post('/object/usage/', payload)
         return response
-    
+
     def create_subscription(self, payload):
         response = self._post('/subscriptions/', payload)
         return response
-    
+
     def cancel_subscription(self, subscriptionkey, payload):
-        response = self._put('/subscriptions/{}/cancel'.format(subscriptionkey), payload)
+        response = self._put(
+            '/subscriptions/{}/cancel'.format(subscriptionkey), payload)
         assert response['success'], response
-        
