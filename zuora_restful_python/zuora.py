@@ -39,7 +39,7 @@ class Zuora(object):
         token = oauth.fetch_token(token_url='https://rest.zuora.com/oauth/token',
                                   client_id=client_id, client_secret=client_secret)
 
-        self.request = token
+        self.requests = token
         self.headers = header
 
         if endpoint == 'production':
@@ -53,25 +53,25 @@ class Zuora(object):
 
     def _get(self, path, payload=None):
         response = self.requests.get(self.endpoint + path,
-                                     headers=self.headers,
-                                     params=payload)
+                                headers=self.headers,
+                                params=payload)
         return _unpack_response('GET', path, response)
 
     def _delete(self, path):
         response = self.requests.delete(self.endpoint + path,
-                                        headers=self.headers)
+                                   headers=self.headers)
         return _unpack_response('GET', path, response)
 
     def _post(self, path, payload):
         response = self.requests.post(self.endpoint + path,
-                                      json=payload,
-                                      headers=self.headers)
+                                 json=payload,
+                                 headers=self.headers)
         return _unpack_response('POST', path, response)
 
     def _put(self, path, payload):
         response = self.requests.put(self.endpoint + path,
-                                     json=payload,
-                                     headers=self.headers)
+                                json=payload,
+                                headers=self.headers)
         return _unpack_response('POST', path, response)
 
     def query(self, query_string):
