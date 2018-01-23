@@ -52,26 +52,26 @@ class Zuora(object):
         self.accounting_periods = None
 
     def _get(self, path, payload=None):
-        response = requests.get(self.endpoint + path,
-                                headers=self.headers,
-                                params=payload)
+        response = self.requests.get(self.endpoint + path,
+                                     headers=self.headers,
+                                     params=payload)
         return _unpack_response('GET', path, response)
 
     def _delete(self, path):
-        response = requests.delete(self.endpoint + path,
-                                   headers=self.headers)
+        response = self.requests.delete(self.endpoint + path,
+                                        headers=self.headers)
         return _unpack_response('GET', path, response)
 
     def _post(self, path, payload):
-        response = requests.post(self.endpoint + path,
-                                 json=payload,
-                                 headers=self.headers)
+        response = self.requests.post(self.endpoint + path,
+                                      json=payload,
+                                      headers=self.headers)
         return _unpack_response('POST', path, response)
 
     def _put(self, path, payload):
-        response = requests.put(self.endpoint + path,
-                                json=payload,
-                                headers=self.headers)
+        response = self.requests.put(self.endpoint + path,
+                                     json=payload,
+                                     headers=self.headers)
         return _unpack_response('POST', path, response)
 
     def query(self, query_string):
