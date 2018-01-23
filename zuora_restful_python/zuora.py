@@ -1,21 +1,19 @@
 """
     Class Zuora
 
-    wraps the Zuora rest api
+    wraps the Zuora rest api with OAutv2 authentication
 """
 
 # pylint: disable=C0111,R0904,R0913
 
-
 import datetime
 import json
 import time
-
+from oauthlib.oauth2 import BackendApplicationClient
+from requests_oauthlib import OAuth2Session
 import requests
 
-
 ZUORA_CHUNKSIZE = 50
-
 
 def _unpack_response(operation, path, response):
     if path != '/object/invoice/':
@@ -34,8 +32,13 @@ class Zuora(object):
     example custom headers: headers={'zuora-version':'196.0'}
     """
 
-    def __init__(self, username, password, endpoint='production', headers={}):
-        self.auth = (username, password)
+    def __init__(self, client_id, client_secret, endpoint='production'):
+
+        client = BackendApplicationClient(client_id=client_id)
+        oauth = OAuth2Session(client=client)
+        token = oauth.fetch_token(token_url='https://rest.zuora.com/oauth/token', client_id=client_id, client_secret=client_secret)
+
+        self.headers = {"Authorization": "OAuth %s" % token.access_token}
 
         if endpoint == 'production':
             self.endpoint = 'https://rest.zuora.com/v1'
@@ -44,33 +47,28 @@ class Zuora(object):
         else:
             self.endpoint = endpoint
 
-        self.accounting_periods = None
-        self.headers = headers
+        self.accounting_periods = None        
 
     def _get(self, path, payload=None):
         response = requests.get(self.endpoint + path,
-                                auth=self.auth, 
                                 headers=self.headers,
                                 params=payload)
         return _unpack_response('GET', path, response)
 
     def _delete(self, path):
         response = requests.delete(self.endpoint + path,
-                                   auth=self.auth,
                                   headers=self.headers)
         return _unpack_response('GET', path, response)
 
     def _post(self, path, payload):
         response = requests.post(self.endpoint + path,
                                  json=payload,
-                                 auth=self.auth,
                                  headers=self.headers)
         return _unpack_response('POST', path, response)
 
     def _put(self, path, payload):
         response = requests.put(self.endpoint + path,
                                 json=payload,
-                                auth=self.auth,
                                 headers=self.headers)
         return _unpack_response('POST', path, response)
 
