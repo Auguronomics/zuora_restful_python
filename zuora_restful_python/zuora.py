@@ -48,6 +48,7 @@ class Zuora(object):
             self.endpoint = endpoint
 
         self.accounting_periods = None
+        self.accounting_codes = None
 
     def _get(self, path, payload=None):
         response = self.oauth.request('GET', self.endpoint + path,
@@ -62,7 +63,7 @@ class Zuora(object):
 
     def _post(self, path, payload):
         response = self.oauth.request('POST', self.endpoint + path,
-                                      data=payload,
+                                      data=json.dumps(payload),
                                       headers=self.headers)
         return _unpack_response('POST', path, response)
 
@@ -134,7 +135,7 @@ class Zuora(object):
 
     def get_account_code(self):
         if not self.accounting_codes:
-            self.accounting_code = {}
+            self.accounting_codes = {}
             response = self._get("/accounting-codes/")
             assert response['success'], response
             for account in response['accountingCodes']:
