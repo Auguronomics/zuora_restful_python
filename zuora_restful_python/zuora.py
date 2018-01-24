@@ -35,9 +35,9 @@ class Zuora(object):
     def __init__(self, client_id, client_secret, endpoint='production', header={}):
 
         client = BackendApplicationClient(client_id=client_id)
-        oauth = OAuth2Session(client=client)
-        self.zuora = oauth.fetch_token(token_url='https://rest.zuora.com/oauth/token',
-                                       client_id=client_id, client_secret=client_secret)
+        self.oauth = OAuth2Session(client=client)
+        self.token = self.oauth.fetch_token(token_url='https://rest.zuora.com/oauth/token',
+                                            client_id=client_id, client_secret=client_secret)
         self.headers = header
 
         if endpoint == 'production':
@@ -50,24 +50,24 @@ class Zuora(object):
         self.accounting_periods = None
 
     def _get(self, path, payload=None):
-        response = self.zuora.request('GET', self.endpoint + path,
+        response = self.oauth.request('GET', self.endpoint + path,
                                       headers=self.headers,
                                       data=payload)
         return _unpack_response('GET', path, response)
 
     def _delete(self, path):
-        response = self.zuora.request('DELETE', self.endpoint + path,
+        response = self.oauth.request('DELETE', self.endpoint + path,
                                       headers=self.headers)
         return _unpack_response('GET', path, response)
 
     def _post(self, path, payload):
-        response = self.zuora.request('POST', self.endpoint + path,
+        response = self.oauth.request('POST', self.endpoint + path,
                                       data=payload,
                                       headers=self.headers)
         return _unpack_response('POST', path, response)
 
     def _put(self, path, payload):
-        response = self.zuora.request('PUT', self.endpoint + path,
+        response = self.oauth.request('PUT', self.endpoint + path,
                                       data=payload,
                                       headers=self.headers)
         return _unpack_response('POST', path, response)
