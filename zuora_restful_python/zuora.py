@@ -132,6 +132,16 @@ class Zuora(object):
 
         return self.accounting_periods
 
+    def get_account_code(self):
+        if not self.accounting_codes:
+            self.accounting_code = {}
+            response = self._get("/accounting-codes/")
+            assert response['success'], response
+            for account in response['accountingCodes']:
+                self.accounting_codes[account['name']] = account
+
+        return self.accounting_codes
+
     # samplePayload = {
     #     "revenueDistributions": [
     #         {
