@@ -67,7 +67,7 @@ class AQuA(object):
 
         return response
 
-    def download(self, path, file_id):
+    def download(self, file_id):
         response = self._get("/file/{}".format(file_id), file_id)
 
         return response
