@@ -1,14 +1,11 @@
 """
-    Class AQuA
+    Class Aqua
 
     wraps the Zuora rest api with OAutv2 authentication
 """
 
 # pylint: disable=C0111,R0904,R0913
-
-import datetime
 import json
-import time
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 
@@ -25,7 +22,7 @@ def _unpack_response(operation, path, response):
     return json.loads(response.text)
 
 
-class AQuA(object):
+class Aqua(object):
     """
     instantiates a connection to Zuora service
     """
