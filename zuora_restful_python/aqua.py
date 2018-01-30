@@ -33,7 +33,7 @@ class Aqua(object):
         self.headers = header
 
         if endpoint == 'production':
-            self.endpoint = 'https://www.zuora.com/apps/api/'
+            self.endpoint = 'https://www.zuora.com/apps/api'
         elif endpoint == 'sandbox':
             self.endpoint = 'https://apisandbox.zuora.com/apps/api'
         else:
