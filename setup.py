@@ -6,7 +6,7 @@ setup(
   description = 'zuora REST API wrapper',
   author = 'Bo Laurent',
   author_email = 'bo@bolaurent.com',
-  url = 'https://github.com/bolaurent/zuora_restful_python', 
+  url = 'https://github.com/auguronomics/zuora_restful_python', 
   keywords = ['zuora', 'rest', 'api'], 
   classifiers = [
     'Programming Language :: Python :: 3'
