@@ -12,7 +12,7 @@ from requests_oauthlib import OAuth2Session
 ZUORA_CHUNKSIZE = 50
 
 
-def _unpack_response(operation, path, response):
+def _unpack_responses(operation, path, response):
     if path != '/object/invoice/':
         assert response.status_code == 200, \
             '{} to {} failed: {}'.format(operation, path, response.content)
@@ -46,13 +46,13 @@ class Aqua(object):
         response = self.oauth.request('GET', self.endpoint + path,
                                       headers=self.headers,
                                       data=payload)
-        return _unpack_response('GET', path, response)
+        return _unpack_responses('GET', path, response)
 
     def _post(self, path, payload):
         response = self.oauth.request('POST', self.endpoint + path,
                                       data=json.dumps(payload),
                                       headers=self.headers)
-        return _unpack_response('POST', path, response)
+        return _unpack_responses('POST', path, response)
 
     def query(self, payload):
         response = self._post("/batch-query/", payload)
