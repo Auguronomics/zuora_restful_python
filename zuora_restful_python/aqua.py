@@ -9,9 +9,6 @@ import json
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 
-ZUORA_CHUNKSIZE = 50
-
-
 def _unpack_responses(operation, path, response):
     if path != '/object/invoice/':
         assert response.status_code == 200, \
